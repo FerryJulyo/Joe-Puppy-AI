@@ -126,7 +126,8 @@
 
   <div class="chat-container">
     <div class="chat-header">Tanya Joe Puppy
-      <button onclick="toggleDarkMode()" style="float:right; background:transparent; border:none; color:white; font-size:14px; cursor:pointer;">🌓</button>
+      <button onclick="toggleDarkMode()"
+        style="float:right; background:transparent; border:none; color:white; font-size:14px; cursor:pointer;">🌓</button>
     </div>
     <div class="chat-logs" id="chat-logs"></div>
     <div class="chat-input-area">
@@ -165,6 +166,14 @@
       chatLogs.scrollTop = chatLogs.scrollHeight;
       if (shouldSave) saveToHistory(msg, type);
     }
+
+    // Tekan Enter untuk mengirim
+    $('#chat-input').keypress(function (e) {
+      if (e.which === 13) {
+        $('#chat-submit').click();
+        return false;
+      }
+    });
 
     // Kirim pertanyaan ke backend
     $('#chat-submit').click(function (e) {
