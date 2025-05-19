@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Tanya Joe Puppy</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+    }
+    .chat-container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      height: 80vh;
+    }
+    .chat-header {
+      padding: 15px;
+      background: #007bff;
+      color: white;
+      font-size: 18px;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+    .chat-logs {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+    }
+    .chat-msg {
+      margin: 10px 0;
+      max-width: 80%;
+      padding: 10px 15px;
+      border-radius: 20px;
+      line-height: 1.4;
+    }
+    .self {
+      align-self: flex-end;
+      background: #dcf8c6;
+    }
+    .user {
+      align-self: flex-start;
+      background: #eee;
+    }
+    .chat-input-area {
+      display: flex;
+      border-top: 1px solid #ccc;
+    }
+    .chat-input-area input {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      border-radius: 0 0 0 10px;
+      font-size: 16px;
+    }
+    .chat-input-area button {
+      padding: 15px;
+      border: none;
+      background: #007bff;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 0 0 10px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="chat-container">
+  <div class="chat-header">Tanya Joe Puppy</div>
+  <div class="chat-logs" id="chat-logs"></div>
+  <div class="chat-input-area">
+    <input type="text" id="chat-input" placeholder="Tanyakan apa saja..." />
+    <button id="chat-submit">Kirim</button>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+let INDEX = 0;
+let chatLogs = document.getElementById('chat-logs');
+
+// Load history dari localStorage
+function loadChatHistory() {
+  const history = JSON.parse(localStorage.getItem('chatHistory')) || [];
+  history.forEach(chat => {
+    generateMessage(chat.msg, chat.type, false);
+  });
+}
+
+// Simpan riwayat chat
+function saveToHistory(msg, type) {
+  const history = JSON.parse(localStorage.getItem('chatHistory')) || [];
+  history.push({ msg, type });
+  localStorage.setItem('chatHistory', JSON.stringify(history));
+}
+
+// Tampilkan pesan ke UI
+function generateMessage(msg, type, shouldSave = true) {
+  INDEX++;
+  const div = document.createElement('div');
+  div.className = `chat-msg ${type}`;
+  div.textContent = msg;
+  chatLogs.appendChild(div);
+  chatLogs.scrollTop = chatLogs.scrollHeight;
+  if (shouldSave) saveToHistory(msg, type);
+}
+
+// Kirim pertanyaan ke backend
+$('#chat-submit').click(function(e) {
+  e.preventDefault();
+  const msg = $('#chat-input').val().trim();
+  if (!msg) return;
+
+  generateMessage(msg, 'self');
+  $('#chat-input').val('').prop('disabled', true);
+
+  $.ajax({
+    url: 'https://eportal.happypuppy.id/Helper2/ai_chat_new',
+    method: 'POST',
+    data: {
+      nip: 1,
+      message: msg
+    },
+    success: function(response) {
+      generateMessage(response, 'user');
+      $('#chat-input').prop('disabled', false);
+    },
+    error: function(xhr, status, error) {
+      generateMessage('Terjadi kesalahan. Silakan coba lagi.', 'user');
+      $('#chat-input').prop('disabled', false);
+    }
+  });
+});
+
+$(document).ready(loadChatHistory);
+</script>
+
+</body>
+</html>
